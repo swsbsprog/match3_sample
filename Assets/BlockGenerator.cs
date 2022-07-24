@@ -14,6 +14,8 @@ public class BlockGenerator : MonoBehaviour
     [ContextMenu("생성")]
     public void GenerateBlocks()
     {
+        DestroyExistBlocks();
+
         for (int y = 0; y < MaxY; y++)
         {
             for (int x = 0; x < MaxX; x++)
@@ -24,6 +26,19 @@ public class BlockGenerator : MonoBehaviour
                 newBlock.GetComponent<SpriteRenderer>().sprite =
                     sprites[Random.Range(0, sprites.Count)];
             }
+        }
+    }
+
+    private void DestroyExistBlocks()
+    {
+        //FindObjectOfType<Block>()// 1개만 가져옴
+        Block[] existBlocks = FindObjectsOfType<Block>(); // 전부다 가져옴
+        foreach (var item in existBlocks)
+        {
+            if (Application.isPlaying)
+                Destroy(item.gameObject); // 플레이 중일때만 가능
+            else
+                DestroyImmediate(item.gameObject); // 플레이중이 아닐때도 가능.
         }
     }
 }
