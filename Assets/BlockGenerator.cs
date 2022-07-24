@@ -26,15 +26,21 @@ public class BlockGenerator : MonoBehaviour
         {
             for (int x = 0; x < MaxX; x++)
             {
-                Block newBlock = Instantiate(baseBlock);
-                //newBlock.pos = new Vector2Int(x, y);
-                newBlock.transform.position = new Vector3(x, y, 0);
-                var item = spriteInfos[Random.Range(0, spriteInfos.Count)];
-                newBlock.iconType = item.iconType;
-                //newBlock.name = $"{newBlock.Pos.x}, {newBlock.Pos.y}, {item.iconType}";
-                newBlock.GetComponent<SpriteRenderer>().sprite = item.sprite;
+                NewBlock(y, x);
             }
         }
+    }
+
+    public Block NewBlock(int y, int x)
+    {
+        Block newBlock = Instantiate(baseBlock);
+        //newBlock.pos = new Vector2Int(x, y);
+        newBlock.transform.position = new Vector3(x, y, 0);
+        var item = spriteInfos[Random.Range(0, spriteInfos.Count)];
+        newBlock.iconType = item.iconType;
+        //newBlock.name = $"{newBlock.Pos.x}, {newBlock.Pos.y}, {item.iconType}";
+        newBlock.GetComponent<SpriteRenderer>().sprite = item.sprite;
+        return newBlock;
     }
 
     private void DestroyExistBlocks()

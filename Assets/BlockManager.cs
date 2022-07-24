@@ -58,6 +58,31 @@ public class BlockManager : MonoBehaviour
 
         CheckMatch3();
         DestroyMatchedBlocks();
+        NewBlocks();
+    }
+
+    private void NewBlocks()
+    {
+        for (int x = 0; x < MaxX; x++)
+        {
+            // 비어 있는 갯수 확인.
+            int emptyCount = 0;
+            for (int y = 0; y < MaxY; y++)
+            {
+                var checkBloc = blockDic[new Vector2Int(x, y)];
+                if(checkBloc == null)
+                    emptyCount++;
+            }
+
+            // 갯수만큼 위쪽에 생성.
+            int newPosY = MaxY;
+            for (int i = 0; i < emptyCount; i++)
+            {
+                int y = newPosY + i;
+                var newBlock = blockGenerator.NewBlock(x, y);
+                blockDic[new Vector2Int(x, y)] = newBlock;
+            }
+        }
     }
 
     private void DestroyMatchedBlocks()
