@@ -74,11 +74,43 @@ public class BlockManager : MonoBehaviour
         Move(otherBlock, otherEndPos);
 
         yield return new WaitForSeconds(duration);
-
+        SetBlock(targetBlock);
+        SetBlock(otherBlock);
         CheckMatch3();
         DestroyMatchedBlocks();
         NewBlocks();
         DropBlock();
+    }
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            TestMove();
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            CheckValidPos();
+    }
+
+    private void CheckValidPos()
+    {
+        //blockDic 가 모두 위치 값이랑 동일한지 확인.
+        foreach(var item in blockDic)
+        {
+            if (item.Value == null)
+            {
+                Debug.LogWarning($"좌표에 값 없음:{item.Key}");
+                continue;
+            }
+
+            if(item.Key != item.Value.Pos)
+            {
+                Debug.LogError($"좌표 에러 Key:{item.Key}, 위치:{item.Value.Pos}");
+            }
+        }
+    }
+
+    private void TestMove()
+    {
+        Move(blockDic[new Vector2Int(0, 0)], 0, 1);
     }
 
     private void DropBlock()
