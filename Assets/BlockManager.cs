@@ -76,10 +76,30 @@ public class BlockManager : MonoBehaviour
         yield return new WaitForSeconds(duration);
         SetBlock(targetBlock);
         SetBlock(otherBlock);
-        CheckMatch3();
-        DestroyMatchedBlocks();
-        NewBlocks();
-        DropBlock();
+        bool isRightMove = CheckMatch3(); // 올바른 위치로 이동했냐?(매칭 되는게 있어야함)
+        if (isRightMove == false)
+        {
+            //위치 롤백
+            Move(targetBlock, otherEndPos);
+            Move(otherBlock, targetEndPos);
+            yield return new WaitForSeconds(duration);
+            SetBlock(targetBlock);
+            SetBlock(otherBlock);
+        }
+        else
+        {
+            bool isExistMatching = true;
+            do
+            {
+                DestroyMatchedBlocks();
+                NewBlocks();
+                DropBlock();
+
+                yield return new WaitForSeconds(duration);
+                isExistMatching = CheckMatch3();
+            }
+            while (isExistMatching);
+        }
     }
     private void Update()
     {
@@ -189,15 +209,22 @@ public class BlockManager : MonoBehaviour
         matchListList.Clear();
     }
 
-    private void CheckMatch3()
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns>제대로 움직였다면 return true</returns>
+    private bool CheckMatch3()
     {
-        CheckMatchX();// 가로 체크
+        bool validMoveX = CheckMatchX();// 가로 체크
 
-        CheckMatchY(); // 세로 체크
+        bool validMoveY = CheckMatchY(); // 세로 체크
+
+        return validMoveX || validMoveY;
     }
 
-    private void CheckMatchY()
+    private bool CheckMatchY()
     {
+        bool isMatching = false;
         for (int x = 0; x < MaxX; x++)
         {
             List<Block> matchList = new List<Block>();
@@ -217,22 +244,30 @@ public class BlockManager : MonoBehaviour
                 {
                     // 다른게 나왔다. 
                     if (matchList.Count >= 3)
+                    {
                         matchListList.Add(matchList.ToList()); // 보관하자.
+                        isMatching = true;
+                    }
 
                     matchList.Clear();
                 }
 
                 if (matchList.Count >= 3)
+                { 
                     matchListList.Add(matchList.ToList()); // 보관하자.
+                    isMatching = true;
+                }
 
                 previousBlock = currentBlock;
             }
         }
+        return isMatching;
     }
 
     List<List<Block>> matchListList = new List<List<Block>>();
-    private void CheckMatchX()
+    private bool CheckMatchX()
     {
+        bool isMatching = false;
         for (int y = 0; y < MaxY; y++)
         {
             List<Block> matchList = new List<Block>();
@@ -251,17 +286,26 @@ public class BlockManager : MonoBehaviour
                 {
                     // 다른게 나왔다. 
                     if (matchList.Count >= 3)
+                    {
                         matchListList.Add(matchList.ToList()); // 보관하자.
+                        isMatching = true;
+                    }
 
                     matchList.Clear();
                 }
 
                 if (matchList.Count >= 3)
+                {
                     matchListList.Add(matchList.ToList()); // 보관하자.
+                    isMatching = true;
+                }
+
 
                 previousBlock = currentBlock;
             }
         }
+
+        return isMatching;
     }
 
     private bool CanMove(Block targetBlock, int moveX, int moveY)
