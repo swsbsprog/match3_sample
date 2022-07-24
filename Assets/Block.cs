@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -37,9 +38,15 @@ public class Block : MonoBehaviour
 
     float nextEnableMoveTime;
     public float duration = 0.5f;
+    public Ease ease = Ease.OutSine;
     private void Move(int moveX, int moveY)
     {
         nextEnableMoveTime = Time.time + duration;
-        transform.Translate(moveX, moveY, 0);
+        //transform.Translate(moveX, moveY, 0);
+        var newPos = transform.position;
+        newPos.x += moveX;
+        newPos.y += moveY;
+        transform.DOMove(newPos, duration)
+            .SetEase(ease);
     }
 }
