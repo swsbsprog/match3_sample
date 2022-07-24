@@ -13,6 +13,25 @@ public class BlockManager : MonoBehaviour
 
     public List<Block> blockList = new List<Block>();
     public Dictionary<Vector2Int, Block> blockDic; //
+
+    // 위치 이동하게되면 이동전의 키를 삭제해야한다.
+    //불럭 파괴
+    void DestroyBlock(Block block)
+    {
+        blockDic[block.Pos] = null;
+        Destroy(block.gameObject);
+    }
+    public void MovePosition(Block block, Vector2Int newPosition )
+    {
+        blockDic[block.Pos] = null;
+        block.transform.DOMove(new Vector3(newPosition.x, newPosition.y, 0)
+            , duration).SetEase(ease);
+    }
+    public void SetBlock(Block block) // 위치 이동이 끝난 다음에 해야한다. 
+    {
+        blockDic[block.Pos] = block;
+    }
+
     public BlockGenerator blockGenerator;
 
     float nextEnableMoveTime;
@@ -96,7 +115,8 @@ public class BlockManager : MonoBehaviour
                 blockDic[endPos] = item;
 
                 // 이동
-                item.transform.DOMove(new Vector3(endPos.x, endPos.y, 0), duration);
+                MovePosition(item, endPos);
+                //item.transform.DOMove(new Vector3(endPos.x, endPos.y, 0), duration);
             }
         }
     }
@@ -129,8 +149,9 @@ public class BlockManager : MonoBehaviour
     {
         matchListList.ForEach(list => list.ForEach(block =>
         {
-            blockDic[block.Pos] = null;
-            Destroy(block.gameObject);
+            DestroyBlock(block);
+            //blockDic[block.Pos] = null;
+            //Destroy(block.gameObject);
         }
         ));
         matchListList.Clear();
@@ -153,7 +174,8 @@ public class BlockManager : MonoBehaviour
             {
                 Block currentBlock = blockDic[new Vector2Int(x, y)];
                 // 매칭계산진행
-                if (previousBlock.iconType == currentBlock.iconType) // 같은거다
+                if (previousBlock != null && currentBlock != null 
+                    && previousBlock.iconType == currentBlock.iconType) // 같은거다
                 {
                     if (matchList.Count == 0)       // 기본구현리스트가 비었으면 매치 시작된 첫번째 블락 넣어야한다
                         matchList.Add(previousBlock);
@@ -187,7 +209,7 @@ public class BlockManager : MonoBehaviour
             {
                 Block currentBlock = blockDic[new Vector2Int(x, y)];
                 // 매칭계산진행
-                if(previousBlock.iconType == currentBlock.iconType) // 같은거다
+                if(previousBlock != null && previousBlock != null &&  previousBlock.iconType == currentBlock.iconType) // 같은거다
                 {
                     if (matchList.Count == 0)       // 기본구현리스트가 비었으면 매치 시작된 첫번째 블락 넣어야한다
                         matchList.Add(previousBlock);
@@ -222,9 +244,10 @@ public class BlockManager : MonoBehaviour
 
     private void Move(Block block, Vector2Int endPos)
     {
-        block.transform.DOMove(new Vector3(endPos.x, endPos.y, 0), duration)
-            .SetEase(ease);
-        block.endPos = endPos;
-        blockDic[endPos] = block;
+        //block.endPos = endPos;
+        MovePosition(block, endPos);
+        //block.transform.DOMove(new Vector3(endPos.x, endPos.y, 0), duration)
+            //.SetEase(ease);
+        //blockDic[endPos] = block;
     }
 }

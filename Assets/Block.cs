@@ -7,11 +7,11 @@ using UnityEngine;
 public class Block : MonoBehaviour
 {
     public override string ToString()
-        => $"{endPos.x}, {endPos.y}, {iconType}";
+        => $"{Pos.x}, {Pos.y}, {iconType}";
          
     public int iconType;
-    public Vector2Int endPos;
-    private void Awake() => endPos = Pos;
+    //public Vector2Int endPos;
+    //private void Awake() => endPos = Pos;
 
     public Vector2Int Pos
     {
