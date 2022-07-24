@@ -11,28 +11,39 @@ public class BlockManager : MonoBehaviour
     private void Awake() => instance = this;
     private void OnDestroy() => instance = null;
 
-    public List<Block> blocks = new List<Block>();
+    public List<Block> blockList = new List<Block>();
     void Start()
     {
-        blocks.Clear();
-        blocks.AddRange(FindObjectsOfType<Block>());
+        blockList.Clear();
+        blockList.AddRange(FindObjectsOfType<Block>());
 
-        blockMap = blocks.ToDictionary(x => x.Pos);
+        blockDic = blockList.ToDictionary(x => x.Pos);
     }
-    public Dictionary<Vector2Int, Block> blockMap;
+    public Dictionary<Vector2Int, Block> blockDic; //
 
     float nextEnableMoveTime;
     public float duration = 0.5f;
     public Ease ease = Ease.OutSine;
-    internal void Move(Block block, int moveX, int moveY)
+    internal void Move(Block targetBlock, int moveX, int moveY)
     {
         if (Time.time < nextEnableMoveTime) return;
 
         nextEnableMoveTime = Time.time + duration;
-        var newPos = block.transform.position;
-        newPos.x += moveX;
-        newPos.y += moveY;
-        block.transform.DOMove(newPos, duration)
+
+        Vector2Int key = targetBlock.Pos;
+        print(blockDic[key] == targetBlock);
+        Vector2Int otherKey = key + new Vector2Int(moveX, moveY);
+        Block otherBlock = blockDic[otherKey];
+        Vector2Int targetEndPos = otherKey;
+        Vector2Int otherEndPos = key;
+
+        Move(targetBlock, targetEndPos);
+        Move(otherBlock, otherEndPos);
+    }
+
+    private void Move(Block block, Vector2Int endPos)
+    {
+        block.transform.DOMove(new Vector3(endPos.x, endPos.y, 0), duration)
             .SetEase(ease);
     }
 }
