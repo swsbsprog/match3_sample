@@ -38,6 +38,12 @@ public class BlockManager : MonoBehaviour
         if (Time.time < nextEnableMoveTime) return;
         nextEnableMoveTime = Time.time + duration;
 
+
+        StartCoroutine(MoveCo(targetBlock, moveX, moveY));
+    }
+
+    private IEnumerator MoveCo(Block targetBlock, int moveX, int moveY)
+    {
         Vector2Int key = targetBlock.Pos;
         print(blockDic[key] == targetBlock);
         Vector2Int otherKey = key + new Vector2Int(moveX, moveY);
@@ -48,16 +54,59 @@ public class BlockManager : MonoBehaviour
         Move(targetBlock, targetEndPos);
         Move(otherBlock, otherEndPos);
 
+        yield return new WaitForSeconds(duration);
+
         CheckMatch3();
+        DestroyMatchedBlocks();
+    }
+
+    private void DestroyMatchedBlocks()
+    {
+        matchListList.ForEach(list => list.ForEach(block => Destroy(block.gameObject)));
+        matchListList.Clear();
     }
 
     private void CheckMatch3()
     {
-        // 가로 체크
-        CheckMatchX();
-        // 세로 체크
+        CheckMatchX();// 가로 체크
+
+        CheckMatchY(); // 세로 체크
     }
 
+    private void CheckMatchY()
+    {
+        for (int x = 0; x < MaxX; x++)
+        {
+            List<Block> matchList = new List<Block>();
+            Block previousBlock = blockDic[new Vector2Int(x, 0)];   // 첫번째 블락 할당
+            for (int y = 1; y < MaxY; y++)
+            {
+                Block currentBlock = blockDic[new Vector2Int(x, y)];
+                // 매칭계산진행
+                if (previousBlock.iconType == currentBlock.iconType) // 같은거다
+                {
+                    if (matchList.Count == 0)       // 기본구현리스트가 비었으면 매치 시작된 첫번째 블락 넣어야한다
+                        matchList.Add(previousBlock);
+                    matchList.Add(currentBlock);
+                }
+                else
+                {
+                    // 다른게 나왔다. 
+                    if (matchList.Count >= 3)
+                        matchListList.Add(matchList.ToList()); // 보관하자.
+
+                    matchList.Clear();
+                }
+
+                if (matchList.Count >= 3)
+                    matchListList.Add(matchList.ToList()); // 보관하자.
+
+                previousBlock = currentBlock;
+            }
+        }
+    }
+
+    List<List<Block>> matchListList = new List<List<Block>>();
     private void CheckMatchX()
     {
         for (int y = 0; y < MaxY; y++)
@@ -70,14 +119,21 @@ public class BlockManager : MonoBehaviour
                 // 매칭계산진행
                 if(previousBlock.iconType == currentBlock.iconType) // 같은거다
                 {
-                    if (matchList.Count == 0)       // 리스트가 비었으면 매치 시작된 첫번째 블락 넣어야한다
+                    if (matchList.Count == 0)       // 기본구현리스트가 비었으면 매치 시작된 첫번째 블락 넣어야한다
                         matchList.Add(previousBlock);
                     matchList.Add(currentBlock);
                 }
                 else
                 {
                     // 다른게 나왔다. 
+                    if (matchList.Count >= 3)
+                        matchListList.Add(matchList.ToList()); // 보관하자.
+
+                    matchList.Clear();
                 }
+
+                if (matchList.Count >= 3)
+                    matchListList.Add(matchList.ToList()); // 보관하자.
 
                 previousBlock = currentBlock;
             }
@@ -98,6 +154,7 @@ public class BlockManager : MonoBehaviour
     {
         block.transform.DOMove(new Vector3(endPos.x, endPos.y, 0), duration)
             .SetEase(ease);
+        block.endPos = endPos;
         blockDic[endPos] = block;
     }
 }

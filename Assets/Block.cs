@@ -7,9 +7,12 @@ using UnityEngine;
 public class Block : MonoBehaviour
 {
     public override string ToString()
-        => $"{Pos.x}, {Pos.y}, {iconType}";
+        => $"{endPos.x}, {endPos.y}, {iconType}";
          
     public int iconType;
+    public Vector2Int endPos;
+    private void Awake() => endPos = Pos;
+
     public Vector2Int Pos
     {
         get
@@ -57,5 +60,11 @@ public class Block : MonoBehaviour
     private void Move(int moveX, int moveY)
     {
         BlockManager.instance.Move(this, moveX, moveY);
+    }
+
+    public string log;
+    private void Update()
+    {
+        log = ToString();
     }
 }
