@@ -59,6 +59,46 @@ public class BlockManager : MonoBehaviour
         CheckMatch3();
         DestroyMatchedBlocks();
         NewBlocks();
+        DropBlock();
+    }
+
+    private void DropBlock()
+    {
+        // 같은 줄에서 몇번째 밑에 있는지로 드랍될 Y위치 설정.
+        for (int x = 0; x < MaxX; x++)
+        {
+            List<Block> moveBlocks = new List<Block>();
+            for (int y = 0; y < MaxY * 2; y++) // * 2 보드 위에 생성된 칸까지 체크하기 위해 * 2 했음
+            {
+                var checkPos = new Vector2Int(x, y);
+                if (blockDic.ContainsKey(checkPos) == false)
+                    continue;
+
+                var checkBlock = blockDic[checkPos];
+                if (checkBlock == null)
+                    continue;
+
+                moveBlocks.Add(checkBlock);
+            }
+
+            // 움직이게
+            for (int i = 0; i < moveBlocks.Count; i++)
+            {
+                var item = moveBlocks[i];
+                var endPos = new Vector2Int(x, i);
+                if (endPos == item.Pos)
+                    continue;
+                //이전 위치에 값 지우고
+                var previousKey = item.Pos;
+                blockDic.Remove(previousKey);
+                
+                // 새위치에 에 값 넣기
+                blockDic[endPos] = item;
+
+                // 이동
+                item.transform.DOMove(new Vector3(endPos.x, endPos.y, 0), duration);
+            }
+        }
     }
 
     private void NewBlocks()
@@ -70,7 +110,7 @@ public class BlockManager : MonoBehaviour
             for (int y = 0; y < MaxY; y++)
             {
                 var checkBloc = blockDic[new Vector2Int(x, y)];
-                if(checkBloc == null)
+                if(checkBloc == null) // 파괴는 했지만 같은 프레임 안에서 체크하면 파괴안되어 있음.
                     emptyCount++;
             }
 
@@ -87,7 +127,12 @@ public class BlockManager : MonoBehaviour
 
     private void DestroyMatchedBlocks()
     {
-        matchListList.ForEach(list => list.ForEach(block => Destroy(block.gameObject)));
+        matchListList.ForEach(list => list.ForEach(block =>
+        {
+            blockDic[block.Pos] = null;
+            Destroy(block.gameObject);
+        }
+        ));
         matchListList.Clear();
     }
 

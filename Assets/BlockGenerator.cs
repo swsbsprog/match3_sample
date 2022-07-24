@@ -26,12 +26,12 @@ public class BlockGenerator : MonoBehaviour
         {
             for (int x = 0; x < MaxX; x++)
             {
-                NewBlock(y, x);
+                NewBlock(x, y);
             }
         }
     }
 
-    public Block NewBlock(int y, int x)
+    public Block NewBlock(int x, int y)
     {
         Block newBlock = Instantiate(baseBlock);
         //newBlock.pos = new Vector2Int(x, y);
