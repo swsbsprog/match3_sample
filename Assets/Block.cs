@@ -6,15 +6,22 @@ using UnityEngine;
 
 public class Block : MonoBehaviour
 {
-    public Vector2Int pos;
     public SpriteRenderer sr;
-
-
+    public Vector2Int Pos
+    {
+        get
+        {
+            Vector2Int intPos = new Vector2Int(
+                (int)MathF.Round(transform.position.x), // 1.1 ~ 1.9 -> 1 소수점 자르기,  1.9 -> 2
+                (int)MathF.Round(transform.position.y)
+                );
+            return intPos;
+        }
+    }
     void OnMouseDown() => previousPos = Input.mousePosition;
     Vector3 previousPos;
     void OnMouseDrag()
     {
-        if (Time.time < nextEnableMoveTime) return;
         Vector3 currentPos = Input.mousePosition;
         float absX = Mathf.Abs(currentPos.x - previousPos.x);
         float absY = Mathf.Abs(currentPos.y - previousPos.y);
@@ -36,17 +43,8 @@ public class Block : MonoBehaviour
         previousPos = currentPos;
     }
 
-    float nextEnableMoveTime;
-    public float duration = 0.5f;
-    public Ease ease = Ease.OutSine;
     private void Move(int moveX, int moveY)
     {
-        nextEnableMoveTime = Time.time + duration;
-        //transform.Translate(moveX, moveY, 0);
-        var newPos = transform.position;
-        newPos.x += moveX;
-        newPos.y += moveY;
-        transform.DOMove(newPos, duration)
-            .SetEase(ease);
+        BlockManager.instance.Move(this, moveX, moveY);
     }
 }
